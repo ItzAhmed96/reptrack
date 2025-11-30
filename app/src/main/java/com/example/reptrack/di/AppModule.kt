@@ -78,6 +78,9 @@ object AppModule {
     val followRemoteDataSource: com.example.reptrack.data.data_sources.remote.FollowRemoteDataSource by lazy {
         com.example.reptrack.data.data_sources.remote.FollowRemoteDataSource(firestore)
     }
+    val notificationRemoteDataSource: com.example.reptrack.data.data_sources.remote.NotificationRemoteDataSource by lazy {
+        com.example.reptrack.data.data_sources.remote.NotificationRemoteDataSource(firestore)
+    }
 
     // Repositories
     val userRepository: UserRepository by lazy { UserRepositoryImpl(authDataSource) }
@@ -113,7 +116,9 @@ object AppModule {
             postRemoteDataSource,
             commentRemoteDataSource,
             likeRemoteDataSource,
-            followRemoteDataSource
+            followRemoteDataSource,
+            notificationRemoteDataSource,
+            firestore
         )
     }
     

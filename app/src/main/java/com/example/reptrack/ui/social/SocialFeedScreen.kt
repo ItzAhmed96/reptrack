@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -25,6 +26,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 fun SocialFeedScreen(
     onNavigateToSearch: () -> Unit,
     onNavigateToPostDetail: (String) -> Unit,
+    onNavigateToNotifications: () -> Unit,
     viewModel: SocialFeedViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -72,6 +74,28 @@ fun SocialFeedScreen(
                                 color = MaterialTheme.colorScheme.primary
                             )
                         }
+                        
+                        // Notification bell with badge
+                        var unreadCount by remember { mutableStateOf(0) }
+                        LaunchedEffect(Unit) {
+                            val result = com.example.reptrack.di.AppModule.socialRepository.getUnreadNotificationCount(currentUserId)
+                            if (result is com.example.reptrack.common.Resource.Success) {
+                                unreadCount = result.data ?: 0
+                            }
+                        }
+                        
+                        BadgedBox(
+                            badge = {
+                                if (unreadCount > 0) {
+                                    Badge { Text(if (unreadCount > 9) "9+" else unreadCount.toString()) }
+                                }
+                            }
+                        ) {
+                            IconButton(onClick = onNavigateToNotifications) {
+                                Icon(androidx.compose.material.icons.Icons.Filled.Notifications, contentDescription = "Notifications")
+                            }
+                        }
+                        
                         IconButton(onClick = onNavigateToSearch) {
                             Icon(Icons.Filled.Search, contentDescription = "Search Users")
                         }

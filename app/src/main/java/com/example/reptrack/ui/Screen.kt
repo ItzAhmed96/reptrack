@@ -32,4 +32,5 @@ sealed class Screen(val route: String) {
         fun createRoute(userId: String) = "user_profile/$userId"
     }
     object SearchUser : Screen("search_user")
+    object Notifications : Screen("notifications")
 }

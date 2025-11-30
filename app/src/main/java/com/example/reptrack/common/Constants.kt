@@ -12,6 +12,8 @@ object Constants {
     const val POSTS_COLLECTION = "posts"
     const val COMMENTS_COLLECTION = "comments"
     const val LIKES_COLLECTION = "likes"
+    const val NOTIFICATIONS_COLLECTION = "notifications"
+    const val FOLLOWS_COLLECTION = "follows"
     
     // Pagination
     const val POSTS_PAGE_SIZE = 20

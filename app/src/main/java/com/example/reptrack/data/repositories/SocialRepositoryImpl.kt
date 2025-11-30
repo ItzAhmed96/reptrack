@@ -1,5 +1,6 @@
 package com.example.reptrack.data.repositories
 
+import com.example.reptrack.common.Constants
 import com.example.reptrack.common.Resource
 import com.example.reptrack.data.data_sources.remote.CommentRemoteDataSource
 import com.example.reptrack.data.data_sources.remote.LikeRemoteDataSource
@@ -7,13 +8,19 @@ import com.example.reptrack.data.data_sources.remote.PostRemoteDataSource
 import com.example.reptrack.domain.models.Comment
 import com.example.reptrack.domain.models.Post
 import com.example.reptrack.data.data_sources.remote.FollowRemoteDataSource
+import com.example.reptrack.data.data_sources.remote.NotificationRemoteDataSource
+import com.example.reptrack.domain.models.Notification
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 class SocialRepositoryImpl(
     private val postDataSource: PostRemoteDataSource,
     private val commentDataSource: CommentRemoteDataSource,
     private val likeDataSource: LikeRemoteDataSource,
-    private val followDataSource: FollowRemoteDataSource
+    private val followDataSource: FollowRemoteDataSource,
+    private val notificationDataSource: NotificationRemoteDataSource,
+    private val firestore: FirebaseFirestore
 ) {
     // Posts
     suspend fun createPost(post: Post): Resource<String> = postDataSource.createPost(post)
@@ -35,6 +42,31 @@ class SocialRepositoryImpl(
         if (result is Resource.Success) {
             // Increment comment count on post
             postDataSource.incrementCommentCount(comment.postId, 1)
+            
+            // Create notification in background
+            try {
+                val postResult = postDataSource.getPost(comment.postId)
+                if (postResult is Resource.Success && postResult.data?.userId != comment.userId) {
+                    val userDoc = firestore.collection(Constants.USERS_COLLECTION)
+                        .document(comment.userId).get().await()
+                    val actorName = userDoc.getString("name") ?: "Someone"
+                    val actorProfilePicUrl = userDoc.getString("profilePicUrl") ?: ""
+                    
+                    val notification = Notification(
+                        userId = postResult.data?.userId ?: "",
+                        actorId = comment.userId,
+                        actorName = actorName,
+                        actorProfilePicUrl = actorProfilePicUrl,
+                        type = "comment",
+                        postId = comment.postId,
+                        message = "$actorName commented on your post"
+                    )
+                    notificationDataSource.createNotification(notification)
+                }
+            } catch (e: Exception) {
+                // Silently fail notification creation
+                android.util.Log.e("SocialRepo", "Failed to create comment notification: ${e.message}")
+            }
         }
         return result
     }
@@ -57,6 +89,31 @@ class SocialRepositoryImpl(
         if (result is Resource.Success) {
             // Increment like count on post
             postDataSource.incrementLikeCount(postId, 1)
+            
+            // Create notification in background
+            try {
+                val postResult = postDataSource.getPost(postId)
+                if (postResult is Resource.Success && postResult.data?.userId != userId) {
+                    val userDoc = firestore.collection(Constants.USERS_COLLECTION)
+                        .document(userId).get().await()
+                    val actorName = userDoc.getString("name") ?: "Someone"
+                    val actorProfilePicUrl = userDoc.getString("profilePicUrl") ?: ""
+                    
+                    val notification = Notification(
+                        userId = postResult.data?.userId ?: "",
+                        actorId = userId,
+                        actorName = actorName,
+                        actorProfilePicUrl = actorProfilePicUrl,
+                        type = "like",
+                        postId = postId,
+                        message = "$actorName liked your post"
+                    )
+                    notificationDataSource.createNotification(notification)
+                }
+            } catch (e: Exception) {
+                // Silently fail notification creation
+                android.util.Log.e("SocialRepo", "Failed to create like notification: ${e.message}")
+            }
         }
         return result
     }
@@ -94,4 +151,13 @@ class SocialRepositoryImpl(
 
     suspend fun getFollowingCount(userId: String): Resource<Int> =
         followDataSource.getFollowingCount(userId)
+        
+    // Notifications
+    suspend fun getNotifications(userId: String) = notificationDataSource.getNotificationsForUser(userId)
+    
+    suspend fun markNotificationAsRead(notificationId: String) = notificationDataSource.markAsRead(notificationId)
+    
+    suspend fun markAllNotificationsAsRead(userId: String) = notificationDataSource.markAllAsRead(userId)
+    
+    suspend fun getUnreadNotificationCount(userId: String) = notificationDataSource.getUnreadCount(userId)
 }

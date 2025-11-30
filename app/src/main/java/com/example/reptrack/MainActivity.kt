@@ -136,6 +136,9 @@ fun RepTrackApp() {
                     },
                     onNavigateToPostDetail = { postId ->
                         navController.navigate(Screen.PostDetail.createRoute(postId))
+                    },
+                    onNavigateToNotifications = {
+                        navController.navigate(Screen.Notifications.route)
                     }
                 )
             }
@@ -297,6 +300,15 @@ fun RepTrackApp() {
             composable(Screen.SearchUser.route) {
                 com.example.reptrack.ui.social.SearchUserScreen(
                     navController = navController
+                )
+            }
+            
+            composable(Screen.Notifications.route) {
+                com.example.reptrack.ui.notifications.NotificationsScreen(
+                    onBack = { navController.popBackStack() },
+                    onNotificationClick = { postId ->
+                        navController.navigate(Screen.PostDetail.createRoute(postId))
+                    }
                 )
             }
             

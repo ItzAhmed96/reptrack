@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "318816703112",
+    "project_id": "reptrack-5f17c",
+    "storage_bucket": "reptrack-5f17c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318816703112:android:623fe4da8a87b1e12c453d",
+        "android_client_info": {
+          "package_name": "com.example.reptrack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAvyffSYkLOMgQ0kk1a9sm9UyBE_5WtGw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

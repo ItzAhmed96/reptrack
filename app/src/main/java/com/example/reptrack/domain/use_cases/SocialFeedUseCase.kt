@@ -43,4 +43,6 @@ class SocialFeedUseCase(
     suspend fun getFollowersCount(userId: String): Resource<Int> = repository.getFollowersCount(userId)
 
     suspend fun getFollowingCount(userId: String): Resource<Int> = repository.getFollowingCount(userId)
+    
+    suspend fun getPostsForUser(userId: String): Resource<List<Post>> = repository.getPostsForUser(userId)
 }

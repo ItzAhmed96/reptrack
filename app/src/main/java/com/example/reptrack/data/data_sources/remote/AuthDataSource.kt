@@ -81,4 +81,21 @@ class AuthDataSource(
             Resource.Error(e.message ?: "Failed to search users")
         }
     }
+    
+    suspend fun updateUser(userId: String, name: String, bio: String, profilePicUrl: String): Resource<Unit> {
+        return try {
+            val updates = hashMapOf<String, Any>(
+                "name" to name,
+                "bio" to bio,
+                "profilePicUrl" to profilePicUrl
+            )
+            firestore.collection(Constants.USERS_COLLECTION)
+                .document(userId)
+                .update(updates)
+                .await()
+            Resource.Success(Unit)
+        } catch (e: Exception) {
+            Resource.Error(e.message ?: "Failed to update profile")
+        }
+    }
 }

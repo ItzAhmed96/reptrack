@@ -52,6 +52,24 @@ class PostRemoteDataSource(
             Resource.Error(e.message ?: "Failed to fetch post")
         }
     }
+    
+    suspend fun getPostsForUser(userId: String): Resource<List<Post>> {
+        return try {
+            android.util.Log.d("PostDataSource", "Fetching posts for user: $userId")
+            val snapshot = firestore.collection(Constants.POSTS_COLLECTION)
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            val posts = snapshot.toObjects(Post::class.java)
+            android.util.Log.d("PostDataSource", "Found ${posts.size} posts for user $userId")
+            // Sort in memory instead of using Firestore orderBy
+            val sortedPosts = posts.sortedByDescending { it.timestamp.seconds }
+            Resource.Success(sortedPosts)
+        } catch (e: Exception) {
+            android.util.Log.e("PostDataSource", "Error fetching user posts: ${e.message}", e)
+            Resource.Error(e.message ?: "Failed to fetch user posts")
+        }
+    }
 
     suspend fun deletePost(postId: String): Resource<Unit> {
         return try {

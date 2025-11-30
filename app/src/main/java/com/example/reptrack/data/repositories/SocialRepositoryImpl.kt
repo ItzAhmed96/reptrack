@@ -23,6 +23,8 @@ class SocialRepositoryImpl(
     
     suspend fun getPost(postId: String): Resource<Post> = postDataSource.getPost(postId)
     
+    suspend fun getPostsForUser(userId: String): Resource<List<Post>> = postDataSource.getPostsForUser(userId)
+    
     suspend fun deletePost(postId: String): Resource<Unit> = postDataSource.deletePost(postId)
     
     suspend fun updatePost(postId: String, content: String): Resource<Unit> = postDataSource.updatePost(postId, content)
